@@ -1,0 +1,67 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  """id of the user"""
+  id: String!
+
+  """fullName of the user"""
+  fullName: String
+
+  """email of the user"""
+  email: String
+
+  """role of the user"""
+  role: String
+
+  """shapassword"""
+  password: String!
+
+  """refreshed token"""
+  refreshToken: String
+}
+
+type Query {
+  users: [User!]!
+  user(id: String!): User!
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserDto!): User!
+  updateUser(updateUserInput: UpdateUserDto!): User!
+  removeUser(id: String!): User!
+}
+
+input CreateUserDto {
+  """first name of the user"""
+  fullName: String
+
+  """email of the user"""
+  email: String
+
+  """role of the user"""
+  role: String
+
+  """password of the user"""
+  password: String!
+
+  """refreshToken of the user"""
+  refreshToken: String!
+}
+
+input UpdateUserDto {
+  """first name of the user"""
+  fullName: String
+
+  """email of the user"""
+  email: String
+
+  """role of the user"""
+  role: String
+
+  """password of the user"""
+  password: String
+  refreshToken: String!
+  id: String!
+}
