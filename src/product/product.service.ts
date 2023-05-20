@@ -21,7 +21,7 @@ export class ProductService {
   async create(createProductDto: CreateProductDto) {
     const product = await this.productRepository.create(createProductDto)
     const productSaved = await this.productRepository.save(product)
-    if (product.stockeable) {
+    if (product.stockeable && createProductDto.stock) {
       await this.createStock(productSaved.id, createProductDto.stock)
     }
     return productSaved
