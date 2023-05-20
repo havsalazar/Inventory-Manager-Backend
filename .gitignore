@@ -5,6 +5,9 @@
 #database
 workshop.db
 
+#configEnv
+config.dev.env
+
 # Logs
 logs
 *.log

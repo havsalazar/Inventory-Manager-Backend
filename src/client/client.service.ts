@@ -3,16 +3,14 @@ import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { Client } from './entities/client.entity';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm'; 
 
 @Injectable()
 export class ClientService {
   constructor(@InjectRepository(Client)
   private clientRepository: Repository<Client>,) { }
   async create(createClientDto: CreateClientDto) {
-    const client = this.clientRepository.create(createClientDto)
-    console.log(client)
+    const client = this.clientRepository.create(createClientDto) 
     return await this.clientRepository.save(client);
   }
 

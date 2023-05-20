@@ -10,7 +10,7 @@ export class Stock {
     id: string;
 
     @ManyToOne(() => Product, (product) => product.id,{nullable:false})
-    @Field(() => String, { description: 'Product id', nullable: true })
+    @Field(() => String, { description: 'Product id', nullable: false })
     product: Product 
 
     @Column({nullable: true,default:0})
