@@ -17,14 +17,15 @@ import { ProductOrderModule } from './product_order/product_order.module';
 import { OrderModule } from './order/order.module';
 import { ClientModule } from './client/client.module';
 import { SupplyingModule } from './supplying/supplying.module';
-
+import { CustomDatabaseLog } from './custom-database-log/custom-database-log';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: "better-sqlite3",
       database: "workshop.db",
       entities: [__dirname + "/**/*.entity{.ts,.js}"],
-      synchronize: true
+      synchronize: true,
+      // logger:new CustomDatabaseLog()
     }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,

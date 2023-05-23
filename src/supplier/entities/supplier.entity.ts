@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ProductSupplier } from 'src/product/entities/product-supplier.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 @ObjectType()
@@ -28,5 +29,6 @@ export class Supplier {
     @ManyToOne(() => User, (user) => user.id)
     @Field(() => String, { description: 'User id', nullable: true })
     user: User
-
+    @OneToMany(()=>ProductSupplier,(productSupplier)=>productSupplier.product)
+    productSuppliers:ProductSupplier[]
 }

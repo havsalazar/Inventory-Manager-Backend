@@ -5,16 +5,16 @@ import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { Stock } from 'src/stock/entities/stock.entity';
-
+import { ProductSupplier } from './entities/product-supplier.entity';
+import { RESPONSE_STATUS } from 'src/shared/statuses';
 @Injectable()
 export class ProductService {
-  STATUSES = {
-    GOOD_RESPONSE: 'OK',
-    PRODUCT_DOESNT_EXIST: 'Product does not exist'
-  }
+
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
-    @InjectRepository(Stock) private sotckRepository: Repository<Stock>
+    @InjectRepository(Stock) private stockRepository: Repository<Stock>,
+    @InjectRepository(ProductSupplier) private productSupplierRepository: Repository<ProductSupplier>
+
 
   ) { }
 
@@ -28,11 +28,11 @@ export class ProductService {
   }
 
   findAll() {
-    return this.productRepository.find({ relations: { stocks: true } })
+    return this.productRepository.find({ relations: { stocks: true, productSuppliers: { supplier: true } } })
   }
 
   async findOne(id: string) {
-    return this.productRepository.findOne({ where: { id }, relations: { stocks: true } })
+    return this.productRepository.findOne({ where: { id }, relations: { stocks: true, productSuppliers: { supplier: true } } })
   }
   //Update the product and its stock 
   async update(id: string, updateProductDto: UpdateProductDto) {
@@ -41,37 +41,45 @@ export class ProductService {
       id,
       ...productData
     })
-    if (!product) return { status: this.STATUSES.PRODUCT_DOESNT_EXIST }
+    if (!product) return { status: RESPONSE_STATUS.PRODUCT_DOESNT_EXIST }
 
     await this.productRepository.save(product)
 
     if (stock && productData.stockeable) {
-      const stockModel = await this.sotckRepository.findOne({ select: ['id', 'quantity'], where: { product: { id } } })
+      const stockModel = await this.stockRepository.findOne({ select: ['id', 'quantity'], where: { product: { id } } })
 
       if (stockModel) {
-        await this.sotckRepository.update({ id: stockModel.id }, { quantity: stock.quantity })
+        await this.stockRepository.update({ id: stockModel.id }, { quantity: stock.quantity })
       } else {
         await this.createStock(id, stock)
       }
     }
-    return { status: this.STATUSES.GOOD_RESPONSE }
+    return { status: RESPONSE_STATUS.GOOD_RESPONSE }
 
   }
 
   async remove(id: string) {
     const product = await this.productRepository.preload({ id })
-    if (!product) return { status: this.STATUSES.PRODUCT_DOESNT_EXIST }
-    await this.sotckRepository.delete({ product: { id: product.id } })
+    if (!product) return { status: RESPONSE_STATUS.PRODUCT_DOESNT_EXIST }
+    await this.stockRepository.delete({ product: { id: product.id } })
     await this.productRepository.delete(product.id)
-    return { status: this.STATUSES.GOOD_RESPONSE }
+    return { status: RESPONSE_STATUS.GOOD_RESPONSE }
+  }
+
+  async findSuppliersByProductId(productId: string) {
+    return this.productSupplierRepository.find({ where: { product: { id: productId } }, relations: { supplier: true } });
+  }
+
+  async removeSupplier(supplierId: string) {
+    return await this.productSupplierRepository.delete({ supplier: { id: supplierId } });
   }
 
   async createStock(productId, stockData) {
-    const stock = await this.sotckRepository.create(
+    const stock = await this.stockRepository.create(
       {
         ...stockData,
         product: { id: productId }
       })
-    await this.sotckRepository.save(stock)
+    await this.stockRepository.save(stock)
   }
 }

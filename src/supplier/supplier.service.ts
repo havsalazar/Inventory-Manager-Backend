@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { Supplier } from './entities/supplier.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { RESPONSE_STATUS } from 'src/shared/statuses';
+import { ProductService } from 'src/product/product.service';
 
 @Injectable()
 export class SupplierService {
-  create(createSupplierDto: CreateSupplierDto) {
-    return 'This action adds a new supplier';
+  constructor(
+    @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>,
+    private productService: ProductService
+  ) { }
+  async create(createSupplierDto: CreateSupplierDto) {
+    const supplier = await this.supplierRepository.create(createSupplierDto)
+    return await this.supplierRepository.create(supplier)
   }
 
   findAll() {
-    return `This action returns all supplier`;
+    return this.supplierRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} supplier`;
+  findOne(id: string) {
+    return this.supplierRepository.findBy({ id });
   }
 
-  update(id: number, updateSupplierDto: UpdateSupplierDto) {
-    return `This action updates a #${id} supplier`;
+  async update(id: string, updateSupplierDto: UpdateSupplierDto) {
+    const supplier = await this.supplierRepository.preload({ id, ...updateSupplierDto })
+    if (!supplier) return { status: RESPONSE_STATUS.SUPPLIER_DOESNT_EXIST }
+    this.supplierRepository.save(supplier)
+    return { status: RESPONSE_STATUS.GOOD_RESPONSE }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} supplier`;
+  async remove(id: string) {
+    await this.productService.removeSupplier(id)
+    await this.supplierRepository.delete({ id })
+    return { status: RESPONSE_STATUS.GOOD_RESPONSE }
   }
 }
