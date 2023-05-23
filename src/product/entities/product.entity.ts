@@ -42,6 +42,9 @@ export class Product {
     @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP"})
     createdAt:Date
 
+    @Column({type:String,length:5000})
+    picture:string
+
     @ManyToOne(() => User, (user) => user.id)
     @Field(() => String, { description: 'User id', nullable: true })
     user: User

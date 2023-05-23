@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { GraphQLModule } from '@nestjs/graphql';
-import { APP_FILTER } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { HttpErrorFilter } from "./shared/http-error.filter";
 import { AuthModule } from './auth/auth.module';
 import * as cors from 'cors';
@@ -18,6 +18,8 @@ import { OrderModule } from './order/order.module';
 import { ClientModule } from './client/client.module';
 import { SupplyingModule } from './supplying/supplying.module';
 import { CustomDatabaseLog } from './custom-database-log/custom-database-log';
+import { AuthGuard } from './auth/auth.guard';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -36,7 +38,7 @@ import { CustomDatabaseLog } from './custom-database-log/custom-database-log';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: 'config.env',
-    }),
+    }),JwtModule.register({}),
     AuthModule,
     ProductModule,
     StockModule,
@@ -53,6 +55,11 @@ import { CustomDatabaseLog } from './custom-database-log/custom-database-log';
     {
       provide: APP_FILTER,
       useClass: HttpErrorFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+      
     }
   ],
 })

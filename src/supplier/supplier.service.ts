@@ -15,7 +15,7 @@ export class SupplierService {
   ) { }
   async create(createSupplierDto: CreateSupplierDto) {
     const supplier = await this.supplierRepository.create(createSupplierDto)
-    return await this.supplierRepository.create(supplier)
+    return this.supplierRepository.save(supplier)
   }
 
   findAll() {

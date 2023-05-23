@@ -2,6 +2,7 @@ import { Controller, Request, Post, Logger, Body, Delete } from '@nestjs/common'
 import { AuthService } from './auth.service'; 
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { AuthDto } from './auth.dto';
+import { Public } from 'src/shared/ispublic.metadata';
 
 @Controller('auth')
 export class AuthController {
@@ -33,16 +34,17 @@ export class AuthController {
     //     };
     //     // return result;
     // }
+    @Public()
     @Post('signup')
     signup(@Body() createUserDto: CreateUserDto) {
       return this.authService.signUp(createUserDto);
     }
-  
+    @Public()
     @Post('signin')
     signin(@Body() data: AuthDto) {
       return this.authService.signIn(data);
     }
-  
+    @Public()
     @Delete('logout')
     logout(@Body() req: Request) {
         console.log(req)

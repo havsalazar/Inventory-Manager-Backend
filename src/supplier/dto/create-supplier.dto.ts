@@ -5,5 +5,6 @@ export class CreateSupplierDto {
     name: string;  
     phone: string; 
     address: string; 
-    user: User 
+    email:string
+    user?: User 
 }

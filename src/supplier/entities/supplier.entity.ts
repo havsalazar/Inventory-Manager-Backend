@@ -21,6 +21,9 @@ export class Supplier {
     @Column({ nullable: true })
     @Field(() => String, { description: '', nullable: true })
     phone: string;
+    @Column({ nullable: true })
+    @Field(() => String, { description: '', nullable: true })
+    email: string;
     
     @Column({ nullable: true })
     @Field(() => String, { description: '', nullable: true })

@@ -40,7 +40,7 @@ export class AuthService {
         // Check if user exists 
         const userExists = await this.usersService.getUserByEmail(
             createUserDto.email,
-        ); 
+        );
         if (userExists) {
             throw new BadRequestException('User already exists');
         }
@@ -69,7 +69,7 @@ export class AuthService {
     }
 
     async logout(id: string) {
-        return this.usersService.update(id,{id,refreshToken: null});
+        return this.usersService.update(id, { id, refreshToken: null });
     }
 
     hashData(data: string) {
@@ -78,7 +78,8 @@ export class AuthService {
 
     async updateRefreshToken(id: string, refreshToken: string) {
         const hashedRefreshToken = await this.hashData(refreshToken);
-        await this.usersService.update(id, {id,
+        await this.usersService.update(id, {
+            id,
             refreshToken: hashedRefreshToken,
         });
     }
@@ -108,10 +109,10 @@ export class AuthService {
         ]);
 
         return {
-            token:{
+            token: {
                 access_token,
                 refresh_token,
-        }
+            }
         };
     }
 
