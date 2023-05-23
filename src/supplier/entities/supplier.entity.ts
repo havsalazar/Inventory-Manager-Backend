@@ -32,6 +32,7 @@ export class Supplier {
     @ManyToOne(() => User, (user) => user.id)
     @Field(() => String, { description: 'User id', nullable: true })
     user: User
+    
     @OneToMany(()=>ProductSupplier,(productSupplier)=>productSupplier.product)
     productSuppliers:ProductSupplier[]
 }

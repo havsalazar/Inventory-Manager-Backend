@@ -6,5 +6,5 @@ export class CreateSupplierDto {
     phone: string; 
     address: string; 
     email:string
-    user?: User 
+    user: User
 }

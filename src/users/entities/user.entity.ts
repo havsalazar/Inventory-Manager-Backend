@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { Supplier } from 'src/supplier/entities/supplier.entity';
 import { Column, Entity, PrimaryGeneratedColumn,OneToMany } from 'typeorm';
 
 @Entity()
@@ -27,5 +28,6 @@ export class User {
     @Column({ nullable: true })
     @Field(() => String, { description: 'refreshed token', nullable: true })
     refreshToken: string;
-    
+    @OneToMany(()=>Supplier,(supplier)=>supplier.user)
+    suppliers:Supplier[]
 }

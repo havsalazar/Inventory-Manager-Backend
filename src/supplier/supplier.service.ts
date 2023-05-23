@@ -6,14 +6,18 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RESPONSE_STATUS } from 'src/shared/statuses';
 import { ProductService } from 'src/product/product.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class SupplierService {
   constructor(
     @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>,
-    private productService: ProductService
+    private productService: ProductService,
+    private userService:UsersService
   ) { }
-  async create(createSupplierDto: CreateSupplierDto) {
+  async create(createSupplierDto: CreateSupplierDto,userPayload) {
+    const user = await this.userService.findOne(userPayload.sub)
+    createSupplierDto.user=user
     const supplier = await this.supplierRepository.create(createSupplierDto)
     return this.supplierRepository.save(supplier)
   }

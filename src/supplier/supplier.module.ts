@@ -7,10 +7,12 @@ import { ProductService } from 'src/product/product.service';
 import { Product } from 'src/product/entities/product.entity';
 import { Stock } from 'src/stock/entities/stock.entity';
 import { ProductSupplier } from 'src/product/entities/product-supplier.entity';
+import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Supplier,ProductSupplier,Product,Stock]),  ],
+  imports: [TypeOrmModule.forFeature([Supplier,ProductSupplier,Product,Stock,User]),  ],
   controllers: [SupplierController],
-  providers: [SupplierService,ProductService],
+  providers: [SupplierService,ProductService,UsersService],
 })
 export class SupplierModule {}
