@@ -16,5 +16,9 @@ export class Stock {
     @Column({nullable: true,default:0})
     @Field(() => Int, { description: '' })
     quantity :Number
+
+    @Column({nullable: true,default:''})
+    @Field(() => String, { description: '' })
+    label :string
     
 }

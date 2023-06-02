@@ -1,53 +1,68 @@
-import { Controller, Request, Post, Logger, Body, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service'; 
+import { JwtService } from '@nestjs/jwt';
+import { Controller, Post, Logger, Body, Delete, Get, UseGuards, Req, ConsoleLogger, UnauthorizedException } from '@nestjs/common';
+import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { AuthDto } from './auth.dto';
 import { Public } from 'src/shared/ispublic.metadata';
+import { RefreshTokenGuard } from './refreshToken.guard';
+import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-    constructor(
-        private authService: AuthService,) { }
-    private readonly logger = new Logger("AuthController");
-    // @UseGuards(AuthGuard('local'))
-    // @Post('login')
-    // async login(@Body() req) {
-    //     this.logger.log("User logged in")
-    //     return this.authService.login(req.email);
-    // }
+  constructor(private jwtService: JwtService,
+    private configService: ConfigService,
+    private authService: AuthService,) { }
+  private readonly logger = new Logger("AuthController");
+  @Public()
+  @Post('signup')
+  signup(@Body() createUserDto: CreateUserDto) {
+    return this.authService.signUp(createUserDto);
+  }
+  @Public()
+  @Post('signin')
+  signin(@Body() data: AuthDto) {
+    return this.authService.signIn(data);
+  }
+  @Public()
+  @Delete('logout')
+  logout(@Body() req: Request) {
+    console.log(req)
+    this.authService.logout(req['user']['sub']);
+  }
 
-    // @Post('signup')
-    // async createUser(
-    //     @Body('password') password: string,
-    //     @Body('email') email: string,
+  // @UseGuards(RefreshTokenGuard)
+  @Public()
+  @Get('refresh-token')
+  async refreshTokens(@Req() req: Request) {
+    const { accessToken, refreshToken } = this.extractTokenFromHeader(req)
+    let userId = ''
+    try {
+      const payload = await this.jwtService.verifyAsync(
+        refreshToken,
+        {
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET')
+        }
+      );
+      req['user'] = { ...payload, refreshToken: refreshToken };
+      userId = payload['sub']
+    } catch {
+      throw new UnauthorizedException();
+    }
+    // const refreshToken = req.user['refreshToken'];
 
-    // ) {
-    //     const saltOrRounds = 10;
-    //     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
-    //     const result = await this.usersService.signup(
-    //         email,
-    //         hashedPassword,
-    //     );
-    //     const payload = { email: email, sub: result.id };
-    //     return {
-    //         access_token: this.jwtService.sign(payload),
-    //     };
-    //     // return result;
-    // }
-    @Public()
-    @Post('signup')
-    signup(@Body() createUserDto: CreateUserDto) {
-      return this.authService.signUp(createUserDto);
+    return this.authService.refreshTokens(userId, refreshToken);
+  }
+  private extractTokenFromHeader(request: Request) {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    // console.log(type , token)
+    if (token && type === 'Bearer') {
+        // console.log(JSON.parse(token)['access_token'])
+        // const { accessToken, refreshToken } = JSON.parse(token)
+        const accessToken =JSON.parse(token)['access_token']
+        const refreshToken=JSON.parse(token)['refresh_token']
+        return { accessToken,refreshToken  };
     }
-    @Public()
-    @Post('signin')
-    signin(@Body() data: AuthDto) {
-      return this.authService.signIn(data);
-    }
-    @Public()
-    @Delete('logout')
-    logout(@Body() req: Request) {
-        console.log(req)
-      this.authService.logout(req['user']['sub']);
-    }
+    return { accessToken: null, refreshToken: null }
+}
 }

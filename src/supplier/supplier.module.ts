@@ -9,10 +9,14 @@ import { Stock } from 'src/stock/entities/stock.entity';
 import { ProductSupplier } from 'src/product/entities/product-supplier.entity';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Supplier,ProductSupplier,Product,Stock,User]),  ],
+  imports: [TypeOrmModule.forFeature([Supplier,ProductSupplier,Product,Stock,User]),  CacheModule.register({
+    ttl: 5000,
+    max:50
+  }),],
   controllers: [SupplierController],
-  providers: [SupplierService,ProductService,UsersService],
+  providers: [SupplierService,ProductService,UsersService,],
 })
 export class SupplierModule {}

@@ -20,6 +20,9 @@ import { SupplyingModule } from './supplying/supplying.module';
 import { CustomDatabaseLog } from './custom-database-log/custom-database-log';
 import { AuthGuard } from './auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -27,7 +30,7 @@ import { JwtModule } from '@nestjs/jwt';
       database: "workshop.db",
       entities: [__dirname + "/**/*.entity{.ts,.js}"],
       synchronize: true,
-      // logger:new CustomDatabaseLog()
+      logger:new CustomDatabaseLog()
     }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,
@@ -39,6 +42,10 @@ import { JwtModule } from '@nestjs/jwt';
       isGlobal: true,
       envFilePath: 'config.env',
     }),JwtModule.register({}),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'files'),
+      exclude: ['/api/(.*)'],
+    }),
     AuthModule,
     ProductModule,
     StockModule,

@@ -26,6 +26,9 @@ export class Product {
     @Column({ nullable: false, default: 0 })
     @Field(() => String, { description: '', nullable: true })
     price: number
+    @Column({ nullable: true, default: 0 })
+    @Field(() => String, { description: '', nullable: true })
+    vatValue: number
 
     @Column({ nullable: true })
     @Field(() => String, { description: 'IVA Applies', nullable: true })

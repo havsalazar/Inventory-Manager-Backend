@@ -4,6 +4,7 @@ import { Stock } from 'src/stock/entities/stock.entity';
 
 export class UpdateProductDto extends PartialType(CreateProductDto) { 
     price?: number
+    vatValue?: number
     name?: string
     stock?: Stock
 }

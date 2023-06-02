@@ -22,12 +22,23 @@ export class SupplierService {
     return this.supplierRepository.save(supplier)
   }
 
-  findAll() {
+  findAll():Promise<Supplier[]> {
     return this.supplierRepository.find();
   }
+  fullTextSearch(term:string):Promise<Supplier[]> {
+    return this.supplierRepository
+    .createQueryBuilder()
+    .select()
+    .where(`code like '%' || :searchTerm ||'%' `,{searchTerm:term})
+    .orWhere(`UPPER(name) like '%' ||UPPER(:searchTerm) ||'%' `,{searchTerm:term}) 
+    .orWhere(`UPPER(email) like '%' ||UPPER(:searchTerm) ||'%' `,{searchTerm:term})
+    .orWhere(`UPPER(address) like '%' ||UPPER(:searchTerm) ||'%'`,{searchTerm:term})
+    .orWhere(`phone like '%' || :searchTerm ||'%'`,{searchTerm:term})
+    .getMany();
+  }
 
-  findOne(id: string) {
-    return this.supplierRepository.findBy({ id });
+  findOne(id: string):Promise<Supplier> {
+    return this.supplierRepository.findOneBy({ id });
   }
 
   async update(id: string, updateSupplierDto: UpdateSupplierDto) {

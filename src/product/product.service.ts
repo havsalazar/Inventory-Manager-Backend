@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
@@ -9,13 +9,10 @@ import { ProductSupplier } from './entities/product-supplier.entity';
 import { RESPONSE_STATUS } from 'src/shared/statuses';
 @Injectable()
 export class ProductService {
-
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(Stock) private stockRepository: Repository<Stock>,
     @InjectRepository(ProductSupplier) private productSupplierRepository: Repository<ProductSupplier>
-
-
   ) { }
 
   async create(createProductDto: CreateProductDto) {
@@ -34,7 +31,7 @@ export class ProductService {
   async findOne(id: string) {
     return this.productRepository.findOne({ where: { id }, relations: { stocks: true, productSuppliers: { supplier: true } } })
   }
-  //Update the product and its stock 
+  
   async update(id: string, updateProductDto: UpdateProductDto) {
     const { stock, ...productData } = updateProductDto
     const product = await this.productRepository.preload({
@@ -42,20 +39,11 @@ export class ProductService {
       ...productData
     })
     if (!product) return { status: RESPONSE_STATUS.PRODUCT_DOESNT_EXIST }
-
     await this.productRepository.save(product)
-
     if (stock && productData.stockeable) {
-      const stockModel = await this.stockRepository.findOne({ select: ['id', 'quantity'], where: { product: { id } } })
-
-      if (stockModel) {
-        await this.stockRepository.update({ id: stockModel.id }, { quantity: stock.quantity })
-      } else {
-        await this.createStock(id, stock)
-      }
+      await this.updateStock(id, stock)
     }
     return { status: RESPONSE_STATUS.GOOD_RESPONSE }
-
   }
 
   async remove(id: string) {
@@ -74,12 +62,39 @@ export class ProductService {
     return await this.productSupplierRepository.delete({ supplier: { id: supplierId } });
   }
 
+  async updateStock(productId, stocks) {
+    const ids = []
+    for (let index = 0; index < stocks.length; index++) {
+      const stock = stocks[index];
+      if (stock.id) {
+        const stockModel = await this.stockRepository.findOne({ select: ['id', 'quantity'], where: { id: stock.id } })
+        ids.push(stockModel.id);
+        await this.stockRepository.update({ id: stockModel.id }, { quantity: stock.quantity, label: stock.label })
+      } else {
+        const returndIds= await this.createStock(productId, [ {...stock} ]);
+        ids.push(returndIds[0]);
+      }
+    }
+    //delete stocks that dont appear in product request
+    const stocksINDB = await this.stockRepository.find({ select: ['id'], where: { product: { id: productId } } })
+    let stocksToDelete = stocksINDB.filter(o1 => !ids.some(o2 => o1.id === o2));
+    await this.stockRepository.delete({id:In(stocksToDelete.map((stok)=>{return stok.id}))});
+  }
+
   async createStock(productId, stockData) {
-    const stock = await this.stockRepository.create(
-      {
-        ...stockData,
-        product: { id: productId }
-      })
-    await this.stockRepository.save(stock)
+    const ids=[]
+    for (let index = 0; index < stockData.length; index++) {
+      const element = stockData[index];
+      const { id, ...data } = element;
+      const stock = await this.stockRepository.create(
+        {
+          quantity: data.quantity,
+          label: data.label,
+          product: { id: productId }
+        })
+      const savedStock= await this.stockRepository.save(stock)
+      ids.push(savedStock.id)
+    }
+    return ids
   }
 }

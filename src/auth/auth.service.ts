@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotAcceptableException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { UsersService } from './../users/users.service';
 // import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -15,20 +15,7 @@ export class AuthService {
         private configService: ConfigService,
     ) { }
 
-
-    // async validateUser(email: string, password: string): Promise<any> {
-    //     console.log(email)
-    //     const user = await this.usersService.getUserByEmail(email);
-    //     if (!user) return null;
-    //     const passwordValid = await bcrypt.compare(password, user.password)
-    //     if (!user) {
-    //         throw new NotAcceptableException('could not find the user');
-    //     }
-    //     if (user && passwordValid) {
-    //         return user;
-    //     }
-    //     return null;
-    // }
+ 
     async login(user: any) {
         const payload = { email: user.email, sub: user.id };
         return {
@@ -84,26 +71,26 @@ export class AuthService {
         });
     }
 
-    async getTokens(id: string, username: string) {
+    async getTokens(id: string, email: string) {
         const [access_token, refresh_token] = await Promise.all([
             this.jwtService.signAsync(
                 {
                     sub: id,
-                    username,
+                    email,
                 },
                 {
                     secret: this.configService.get<string>('JWT_SECRET'),
-                    expiresIn: '15m',
+                    expiresIn: this.configService.get<string>('JWT_TIME'),
                 },
             ),
             this.jwtService.signAsync(
                 {
                     sub: id,
-                    username,
+                    email,
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-                    expiresIn: '7d',
+                    expiresIn: this.configService.get<string>('JWT_TIME_REFRESH'),
                 },
             ),
         ]);
@@ -116,6 +103,19 @@ export class AuthService {
         };
     }
 
+    async refreshTokens(userId: string, refreshToken: string) {
+        const user = await this.usersService.findOne(userId);
+        if (!user || !user.refreshToken)
+          throw new ForbiddenException('Access Denied');
+        const refreshTokenMatches = await argon2.verify(
+          user.refreshToken,
+          refreshToken,
+        );
+        if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+        const tokens = await this.getTokens(user.id, user.email);
+        await this.updateRefreshToken(user.id, tokens.token.refresh_token);
+        return tokens;
+      }
 
 
 }

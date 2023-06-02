@@ -6,9 +6,11 @@ export class CreateProductDto {
     name:string
     reference:string
     price:number
+    vatValue:number
     vat:boolean
     stockeable:boolean
     isService:boolean
+    picture?:string
     user:User
     stock?:Stock
 }

@@ -8,5 +8,5 @@ export class CreateClientDto {
     identification_number:string 
     email:string 
     phone:string   
-    userId:User
+    user:User
 }
