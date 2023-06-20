@@ -7,6 +7,7 @@ import { Injectable } from '@nestjs/common';
 import { Stock } from 'src/stock/entities/stock.entity';
 import { ProductSupplier } from './entities/product-supplier.entity';
 import { RESPONSE_STATUS } from 'src/shared/statuses';
+import { chunkArray } from 'src/shared/common.functions';
 @Injectable()
 export class ProductService {
   constructor(
@@ -31,7 +32,7 @@ export class ProductService {
   async findOne(id: string) {
     return this.productRepository.findOne({ where: { id }, relations: { stocks: true, productSuppliers: { supplier: true } } })
   }
-  
+
   async update(id: string, updateProductDto: UpdateProductDto) {
     const { stock, ...productData } = updateProductDto
     const product = await this.productRepository.preload({
@@ -71,18 +72,18 @@ export class ProductService {
         ids.push(stockModel.id);
         await this.stockRepository.update({ id: stockModel.id }, { quantity: stock.quantity, label: stock.label })
       } else {
-        const returndIds= await this.createStock(productId, [ {...stock} ]);
+        const returndIds = await this.createStock(productId, [{ ...stock }]);
         ids.push(returndIds[0]);
       }
     }
     //delete stocks that dont appear in product request
     const stocksINDB = await this.stockRepository.find({ select: ['id'], where: { product: { id: productId } } })
     let stocksToDelete = stocksINDB.filter(o1 => !ids.some(o2 => o1.id === o2));
-    await this.stockRepository.delete({id:In(stocksToDelete.map((stok)=>{return stok.id}))});
+    await this.stockRepository.delete({ id: In(stocksToDelete.map((stok) => { return stok.id })) });
   }
 
   async createStock(productId, stockData) {
-    const ids=[]
+    const ids = []
     for (let index = 0; index < stockData.length; index++) {
       const element = stockData[index];
       const { id, ...data } = element;
@@ -92,9 +93,33 @@ export class ProductService {
           label: data.label,
           product: { id: productId }
         })
-      const savedStock= await this.stockRepository.save(stock)
+      const savedStock = await this.stockRepository.save(stock)
       ids.push(savedStock.id)
     }
     return ids
+  }
+  fullTextSearch(term: string): Promise<Product[]> {
+    return this.productRepository
+      .createQueryBuilder('products')
+      .select()
+      .innerJoinAndSelect(
+        "products.stocks",
+        "stocks", 
+      )
+      .where(`UPPER(code) like '%' || UPPER(:searchTerm) ||'%' `, { searchTerm: term })
+      .orWhere(`UPPER(name) like '%' ||UPPER(:searchTerm) ||'%' `, { searchTerm: term })
+      .orWhere(`UPPER(reference) like '%' ||UPPER(:searchTerm) ||'%' `, { searchTerm: term })
+      .getMany();
+  }
+  async createMany(createProductDto: CreateProductDto[]){
+    // await this.clientRepository.createQueryBuilder().insert().values(createClientsDto).execute()
+
+    const chunkedProducts=chunkArray(createProductDto,100)
+
+    chunkedProducts.forEach(async clients=>{
+      await this.productRepository.createQueryBuilder().insert().values(clients).execute()
+    }) 
+
+    return { status: RESPONSE_STATUS.GOOD_RESPONSE }
   }
 }

@@ -5,6 +5,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { Public } from 'src/shared/ispublic.metadata';
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
@@ -29,7 +30,10 @@ export class ProductController {
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
-
+  @Get('full-text-search/:term')
+  fullTextSearch(@Param('term') term: string){
+    return this.productService.fullTextSearch(term);
+  }
   @Get()
   findAll() {
     return this.productService.findAll();
@@ -50,6 +54,10 @@ export class ProductController {
     return this.productService.remove(id);
   }
 
-  
+  @Public()
+  @Post('createMany')
+  initialize(@Body() createProductDto:CreateProductDto[] ){
+    return this.productService.createMany(createProductDto);
+  }
 
 }
