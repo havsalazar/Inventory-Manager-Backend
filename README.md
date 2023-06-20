@@ -1,9 +1,4 @@
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-[InventoryFront](https://github.com/havsalazar/Inventory-Manager-FrontEnd)
- 
+## Description 
 
 This project will be used for small shops and workshops to manage inventory, invoices, and customers. But before we dive in, let me give you a bit of background about this project:
 
