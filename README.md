@@ -8,9 +8,10 @@ Now, I don't want to make this personal project too big, but I do want it to be 
 
 Let's get to the important part:
 
-This project uses NestJS and therefore TypeScript. The database being used is SQLite (you can change it to any supported by TypeORM). The documentation will be generated using Swagger (yet to be implemented).
+This project uses NestJS and therefore TypeScript. The database being used is SQLite (you can change it to any supported by TypeORM).  
 
 You could find the frontEnd here [InventoryFront](https://github.com/havsalazar/Inventory-Manager-FrontEnd) 
+
 
 
 ## Installation
@@ -45,4 +46,6 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
- 
+## Swagger path
+
+http://localhost:3000/documentation
