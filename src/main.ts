@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { urlencoded, json } from 'express';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,30 @@ async function bootstrap() {
   //   res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
   //   next();
   // }); 
+
+
+  const config = new DocumentBuilder()
+  .setTitle('Workshop')
+  .setDescription('The cats API description')
+  .setVersion('1.0')
+  .addBearerAuth({
+    type:'http',
+    scheme:'bearer',
+    bearerFormat:'JWT',
+    name:'access_token',
+    description:'enter jwt token',
+    in:'header'
+  },'jwt-auth')
+  // .addTag('cats')
+  .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('documentation', app, document);
+
+
+
+
+
+
   await app.listen(3000);
 }
 bootstrap();

@@ -1,12 +1,20 @@
 import { User } from "src/users/entities/user.entity";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateClientDto { 
     // id: string 
-    fullName:string; 
-    plate:string; 
-    identification_type:number  
-    identification_number:string 
-    email:string 
-    phone:string   
+    @ApiProperty()
+    fullName:string;
+    @ApiProperty() 
+    plate:string;
+    @ApiProperty() 
+    identification_type:number
+    @ApiProperty()  
+    identification_number:string
+    @ApiProperty() 
+    email:string
+    @ApiProperty() 
+    phone:string  
+    @ApiProperty() 
     user:User
 }

@@ -7,8 +7,11 @@ import { Public } from 'src/shared/ispublic.metadata';
 import { RefreshTokenGuard } from './refreshToken.guard';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
+
 export class AuthController {
   constructor(private jwtService: JwtService,
     private configService: ConfigService,

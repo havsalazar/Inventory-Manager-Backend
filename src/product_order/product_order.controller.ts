@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProductOrderService } from './product_order.service';
 import { CreateProductOrderDto } from './dto/create-product_order.dto';
 import { UpdateProductOrderDto } from './dto/update-product_order.dto';
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('Product Order')
 
 @Controller('product-order')
 export class ProductOrderController {

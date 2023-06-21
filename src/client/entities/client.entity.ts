@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn ,ManyToOne} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 @Entity()
 @ObjectType()
@@ -13,6 +14,7 @@ export class Client {
     @Field(() => String, { description: '', nullable: false })
     fullName:string;
 
+    @ApiPropertyOptional()
     @Column({ nullable: true })
     @Field(() => String, { description: '', nullable: true })
     plate:string;

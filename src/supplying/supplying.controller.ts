@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { SupplyingService } from './supplying.service';
 import { CreateSupplyingDto } from './dto/create-supplying.dto';
 import { UpdateSupplyingDto } from './dto/update-supplying.dto';
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('Supplying')
 
 @Controller('Supplying')
 export class SupplyingController {

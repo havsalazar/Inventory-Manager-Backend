@@ -29,10 +29,10 @@ export class AuthGuard implements CanActivate {
         }
 
         const request = context.switchToHttp().getRequest();
-        const {accessToken, refreshToken }= this.extractTokenFromHeader(request); 
+        const { accessToken, refreshToken } = this.extractTokenFromHeader(request);
         if (!accessToken) {
             throw new UnauthorizedException();
-        } 
+        }
         try {
             // this.logger.log(process.env.JWT_SECRET)
             const payload = await this.jwtService.verifyAsync(
@@ -50,13 +50,21 @@ export class AuthGuard implements CanActivate {
     }
 
     private extractTokenFromHeader(request: Request) {
-        const [type, token] = request.headers.authorization?.split(' ') ?? []; 
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        const documentationUrl = `${this.configService.get<string>('URL')}/documentation`
+
         if (token && type === 'Bearer') {
-            // console.log(JSON.parse(token)['access_token'])
-            // const { accessToken, refreshToken } = JSON.parse(token)
-            const accessToken =JSON.parse(token)['access_token']
-            const refreshToken=JSON.parse(token)['refresh_token']
-            return { accessToken,refreshToken  };
+            /*This only works for documentation url(swagger) */
+            if (request.headers.referer === documentationUrl) {
+                
+                return { accessToken: token, refreshToken: '' };
+
+            } else {
+                const accessToken = JSON.parse(token)['access_token']
+                const refreshToken = JSON.parse(token)['refresh_token']
+                return { accessToken, refreshToken };
+            }
+
         }
         return { accessToken: null, refreshToken: null }
     }
